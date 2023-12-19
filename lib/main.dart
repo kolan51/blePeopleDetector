@@ -1,26 +1,31 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_reactive_ble/flutter_reactive_ble.dart';
 import 'package:nested/nested.dart';
 import 'package:provider/provider.dart';
 
+import 'functions/notification_service.dart';
 import 'providers/ble_logger.dart';
 import 'providers/ble_scanner.dart';
 import 'screens/home_screen.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final FlutterReactiveBle _ble = FlutterReactiveBle();
-  final BleLogger bleLogger = BleLogger(ble: _ble);
+  await NotificationService().init(); // <----
+
+  final FlutterReactiveBle ble = FlutterReactiveBle();
+  final BleLogger bleLogger = BleLogger(ble: ble);
 
   final BleScanner scanner =
-      BleScanner(ble: _ble, logMessage: bleLogger.addToLog);
+      BleScanner(ble: ble, logMessage: bleLogger.addToLog);
 
   runApp(
     MultiProvider(
       providers: <SingleChildWidget>[
-        Provider.value(value: scanner),
-        Provider.value(value: bleLogger),
+        Provider<BleScanner>.value(value: scanner),
+        Provider<BleLogger>.value(value: bleLogger),
         StreamProvider<BleScannerState?>(
           create: (_) => scanner.state,
           initialData: const BleScannerState(
@@ -33,23 +38,9 @@ void main() {
         title: 'Flutter Reactive BLE example',
         color: Colors.transparent,
         theme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
         home: const HomeScreen(),
       ),
     ),
   );
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  // This widget is the root of your application.
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      color: Colors.transparent,
-      debugShowCheckedModeBanner: false,
-      title: 'Nearby People Counter',
-      home: HomeScreen(),
-    );
-  }
 }

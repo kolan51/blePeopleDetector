@@ -7,13 +7,13 @@ class BleLogger {
   }) : _ble = ble;
 
   final FlutterReactiveBle _ble;
-  final List<String> _logMessages = [];
+  final List<String> _logMessages = <String>[];
   final DateFormat formatter = DateFormat('HH:mm:ss.SSS');
 
   List<String> get messages => _logMessages;
 
   void addToLog(String message) {
-    final now = DateTime.now();
+    final DateTime now = DateTime.now();
     _logMessages.add('${formatter.format(now)} - $message');
   }
 

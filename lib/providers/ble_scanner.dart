@@ -17,18 +17,19 @@ class BleScanner implements ReactiveState<BleScannerState> {
   final FlutterReactiveBle _ble;
   final void Function(String message) _logMessage;
   final StreamController<BleScannerState> _stateStreamController =
-      StreamController();
+      StreamController<BleScannerState>();
 
   final List<DiscoveredDevice> _devices = <DiscoveredDevice>[];
 
   @override
   Stream<BleScannerState> get state => _stateStreamController.stream;
 
-  void startScan(List<Uuid> serviceIds) {
+  //List<Uuid> serviceIds argument to filter by service
+  void startScan() {
     _logMessage('Start ble discovery');
     _devices.clear();
     _subscription?.cancel();
-    _subscription = _ble.scanForDevices(withServices: serviceIds).listen(
+    _subscription = _ble.scanForDevices(withServices: <Uuid>[]).listen(
         (DiscoveredDevice device) {
       final int knownDeviceIndex =
           _devices.indexWhere((DiscoveredDevice d) => d.id == device.id);
@@ -37,6 +38,7 @@ class BleScanner implements ReactiveState<BleScannerState> {
       } else {
         _devices.add(device);
       }
+      print(device);
       _pushState();
     }, onError: (Object e) => _logMessage('Device scan fails with error: $e'));
     _pushState();
@@ -63,7 +65,7 @@ class BleScanner implements ReactiveState<BleScannerState> {
     await _stateStreamController.close();
   }
 
-  StreamSubscription? _subscription;
+  StreamSubscription<dynamic>? _subscription;
 }
 
 @immutable
